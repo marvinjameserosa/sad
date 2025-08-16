@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+<div class="sparky-message">
+  [SPARKY]:~# Since we were able to get user level access from our last mission,
+  enter your handle to access the Sovereignty Central Command network and use
+  password for the password.
+</div>
+
+<form method="POST" action="{{ url_for('login') }}">
+  <div style="margin-top: 20px">
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      class="terminal-input"
+    />
+  </div>
+  <div style="margin-top: 10px">
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      class="terminal-input"
+    />
+  </div>
+  <div style="margin-top: 10px">
+    <button type="submit" class="terminal-button">Login</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %} {% block content %}
+<div class="sparky-message typing-animation" id="challenge3-intro">
+  [SPARKY]:~# The mathematical barrier is down. We're through.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="challenge2-flag"
+  style="display: none"
+>
+  [SPARKY]:~# You've successfully captured the flag:
+</div>
+
+<div
+  id="flag-display"
+  style="
+    display: none;
+    margin: 10px 0 20px 0;
+    color: #33ff33;
+    font-weight: bold;
+    padding-left: 20px;
+  "
+>
+  {{ flag }}
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message1"
+  style="display: none"
+>
+  [SPARKY]:~# I'm looking at the source ledger's core now.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message2"
+  style="display: none"
+>
+  [SPARKY]:~# Wait... this is unexpected.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message3"
+  style="display: none"
+>
+  [SPARKY]:~# I was expecting layers of encryption, biometric locks, kill
+  switches.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message4"
+  style="display: none"
+>
+  [SPARKY]:~# But there's something else here. Something they never intended
+  anyone to find.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message5"
+  style="display: none"
+>
+  [SPARKY]:~# A single point of failure. Built into the heart of their currency
+  system.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message6"
+  style="display: none"
+>
+  [SPARKY]:~# Someone designed the galaxy's financial backbone to have... an off
+  switch.
+</div>
+
+<div class="secure-channel" id="secure-channel" style="display: none">
+  <div class="secure-header">***** BEGIN SECURE COMMUNIQUE *****</div>
+  <div class="secure-message">[SPARKY]:~# You've proven yourself..</div>
+  <div class="secure-message">[SPARKY]:~# This isn't a challenge box…</div>
+  <div class="secure-message">
+    [SPARKY]:~# But to execute the transaction, we need the kill key. Check the
+    URL, page source, everywhere.
+  </div>
+  <div class="secure-message">
+    [SPARKY]:~# The architects always leave a backdoor.
+  </div>
+  {% if transaction_hash %}
+  <div class="secure-message">
+    [SPARKY]:~# Transaction hash: {{ transaction_hash }}
+  </div>
+  {% endif %}
+  <div class="secure-header">***** END SECURE COMMUNIQUE *****</div>
+</div>
+
+<div
+  id="execute-form"
+  style="margin-top: 30px; text-align: center; display: none"
+>
+  <form method="POST" action="{{ url_for('execute_transaction') }}">
+    <div
+      class="form-row"
+      style="display: flex; justify-content: center; margin-bottom: 20px"
+    >
+      <input
+        type="text"
+        name="kill_key"
+        placeholder="Enter the kill key"
+        class="terminal-input"
+        style="width: 400px; margin-right: 10px"
+        {%
+        if
+        invalid_attempt
+        %}style="border-color: #ff3333;"
+        {%
+        endif
+        %}
+      />
+    </div>
+    <button
+      type="submit"
+      class="terminal-button"
+      style="font-size: 18px; padding: 15px 30px"
+    >
+      EXECUTE TRANSACTION
+    </button>
+  </form>
+</div>
+
+<div
+  class="warning-message"
+  id="warning"
+  style="margin-top: 20px; display: none"
+>
+  Warning: This action cannot be undone. System will initiate critical
+  operations.
+</div>
+
+{% if invalid_attempt %}
+<div
+  class="error-message"
+  style="margin-top: 20px; color: #ff3333; text-align: center"
+>
+  Invalid kill key. System requires the correct access code to execute the
+  transaction.
+</div>
+{% endif %} {% endblock %} {% block scripts %} {{ super() }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const elements = [
+      document.getElementById("challenge3-intro"),
+      document.getElementById("challenge2-flag"),
+      document.getElementById("message1"),
+      document.getElementById("message2"),
+      document.getElementById("message3"),
+      document.getElementById("message4"),
+      document.getElementById("message5"),
+      document.getElementById("message6"),
+      document.getElementById("secure-channel"),
+      document.getElementById("warning"),
+      document.getElementById("execute-form"),
+    ];
+
+    const flagDisplay = document.getElementById("flag-display");
+
+    function showNextElement(index) {
+      if (index < elements.length) {
+        if (index > 0) {
+          elements[index].style.display = "block";
+        }
+
+        if (elements[index].classList.contains("typing-animation")) {
+          const text = elements[index].textContent;
+          elements[index].textContent = "";
+
+          typeWriter(elements[index], text, 30);
+
+          elements[index].addEventListener("typingComplete", function () {
+            if (elements[index].id === "challenge2-flag") {
+              flagDisplay.style.display = "block";
+              setTimeout(() => showNextElement(index + 1), 1500);
+            } else {
+              setTimeout(() => showNextElement(index + 1), 1200);
+            }
+          });
+        } else {
+          setTimeout(() => showNextElement(index + 1), 1200);
+        }
+      }
+    }
+
+    // Start the sequence
+    showNextElement(0);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %} {% block content %}
+<div class="sparky-message typing-animation" id="challenge1-intro">
+  [SPARKY]:~# Welcome to the Source Ledger Authentication System.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message1"
+  style="display: none"
+>
+  [SPARKY]:~# This is Sovereignty Central Command's authentication portal.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message2"
+  style="display: none"
+>
+  [SPARKY]:~# You currently have USER level access, but we need ADMIN privileges
+  to proceed.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message3"
+  style="display: none"
+>
+  [SPARKY]:~# Investigate the code and find a way to elevate your access level.
+</div>
+
+<div id="challenge-info" style="display: none">
+  <div
+    class="auth-status"
+    style="
+      margin-top: 20px;
+      padding: 15px;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+    "
+  >
+    <p>
+      Current Access Level:
+      <span id="auth-level" style="color: yellow">USER</span>
+    </p>
+    <div style="margin-top: 15px">
+      <button id="try-access-btn" class="hacker-button">
+        Try Admin Access
+      </button>
+    </div>
+    <div
+      id="hint-box"
+      style="
+        margin-top: 15px;
+        display: none;
+        color: #33ff33;
+        font-style: italic;
+      "
+    >
+      Hint: Browsers store cookies that can control your access level. What if
+      you could modify them?
+    </div>
+    <div
+      id="flag-reveal"
+      style="
+        margin-top: 15px;
+        display: none;
+        color: #33ff33;
+        background: #0a1a0a;
+        padding: 10px;
+        border: 1px solid #33ff33;
+      "
+    >
+      <p><strong>Congratulations! Flag Revealed:</strong></p>
+      <p>{{ flag }}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %} {{ super() }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const elements = [
+      document.getElementById("challenge1-intro"),
+      document.getElementById("message1"),
+      document.getElementById("message2"),
+      document.getElementById("message3"),
+      document.getElementById("challenge-info"),
+    ];
+
+    function showNextElement(index) {
+      if (index < elements.length) {
+        if (index > 0) {
+          elements[index].style.display = "block";
+        }
+
+        if (elements[index].classList.contains("typing-animation")) {
+          const text = elements[index].textContent;
+          elements[index].textContent = "";
+
+          typeWriter(elements[index], text, 30);
+
+          elements[index].addEventListener("typingComplete", function () {
+            setTimeout(() => showNextElement(index + 1), 1000);
+          });
+        } else {
+          setTimeout(() => showNextElement(index + 1), 1000);
+        }
+      }
+    }
+
+    function checkCookieStatus() {
+      const cookies = document.cookie.split(";");
+      let bypassCookie = false;
+
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim().split("=");
+        if (cookie[0] === "bypass" && cookie[1] === "true") {
+          bypassCookie = true;
+          break;
+        }
+      }
+
+      const authLevel = document.getElementById("auth-level");
+      const flagReveal = document.getElementById("flag-reveal");
+
+      if (bypassCookie) {
+        authLevel.textContent = "ADMIN";
+        authLevel.style.color = "#33ff33";
+        flagReveal.style.display = "block";
+      } else {
+        authLevel.textContent = "USER";
+        authLevel.style.color = "yellow";
+        flagReveal.style.display = "none";
+      }
+    }
+    function setupEventListeners() {
+      document
+        .getElementById("try-access-btn")
+        .addEventListener("click", function () {
+          const hintBox = document.getElementById("hint-box");
+          hintBox.style.display = "block";
+
+          checkCookieStatus();
+
+          setTimeout(() => {
+            alert(
+              "Access Denied! You need admin privileges. Try examining your browser cookies."
+            );
+          }, 500);
+        });
+
+      setInterval(checkCookieStatus, 2000);
+      checkCookieStatus();
+    }
+
+    showNextElement(0);
+
+    elements[elements.length - 1].addEventListener(
+      "typingComplete",
+      setupEventListeners
+    );
+  });
+</script>
+{% endblock %}

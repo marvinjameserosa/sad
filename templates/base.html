@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Ghost-In-The-Shellcode{% endblock %}</title>
+    <style>
+      body {
+        background-color: #0a0a0a;
+        color: #33ff33;
+        font-family: "Courier New", monospace;
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+      }
+      .terminal {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #0a0a0a;
+        border: 1px solid #33ff33;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+        overflow-y: auto;
+        max-height: 80vh;
+      }
+      .terminal-header {
+        border-bottom: 1px solid #33ff33;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .prompt {
+        color: #33ff33;
+        font-weight: bold;
+      }
+      .terminal-input {
+        background-color: transparent;
+        border: none;
+        border-bottom: 1px solid #33ff33;
+        color: #ffffff;
+        font-family: "Courier New", monospace;
+        width: 100%;
+        padding: 5px;
+        margin-top: 10px;
+        outline: none;
+      }
+      .terminal-button {
+        background-color: #33ff33;
+        border: none;
+        color: #0a0a0a;
+        padding: 5px 10px;
+        margin-top: 10px;
+        font-family: "Courier New", monospace;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .terminal-button:hover {
+        background-color: #2bd42b;
+      }
+      .message {
+        margin-bottom: 10px;
+      }
+      .sparky-message {
+        color: #33ff33;
+      }
+      .system-message {
+        color: #3399ff;
+      }
+      .error-message {
+        color: #ff3333;
+      }
+      .success-message {
+        color: #33ff33;
+      }
+      .warning-message {
+        color: #ffcc00;
+      }
+      .secure-channel {
+        background-color: #1a1a1a;
+        border: 1px solid #ffcc00;
+        padding: 10px;
+        margin: 10px 0;
+      }
+      .secure-header {
+        color: #ffcc00;
+        margin-bottom: 10px;
+      }
+      .secure-message {
+        color: #ffcc00;
+      }
+      .flag {
+        color: #ff3333;
+        font-weight: bold;
+        padding: 5px;
+        border: 1px dashed #ff3333;
+        display: inline-block;
+        margin: 10px 0;
+      }
+      .typing-animation {
+        border-right: 2px solid #33ff33;
+        animation: blink 1s step-end infinite;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          border-color: transparent;
+        }
+        50% {
+          border-color: #33ff33;
+        }
+      }
+      .ascii-art {
+        font-family: monospace;
+        white-space: pre;
+        line-height: 1.2;
+        color: #33ff33;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .hint-button {
+        background-color: transparent;
+        color: #ffcc00;
+        border: 1px solid #ffcc00;
+        padding: 5px 10px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .hint-text {
+        display: none;
+        color: #ffcc00;
+        padding: 10px;
+        border: 1px solid #ffcc00;
+        margin: 10px 0;
+      }
+      .challenge-info {
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #1a1a1a;
+        border-left: 3px solid #33ff33;
+      }
+      .logout {
+        color: #ff3333;
+        text-decoration: none;
+        font-size: 0.8em;
+      }
+      .logout:hover {
+        text-decoration: underline;
+      }
+    </style>
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div class="terminal">
+      <div class="terminal-header">
+        <div>Ghost-In-The-Shellcode v2.1</div>
+        {% if session.logged_in %}
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        {% endif %}
+      </div>
+
+      <div class="ascii-art">
+        ██████╗ ██╗ ██╗ ██████╗ ███████╗████████╗ ██╗███╗ ██╗ ████████╗██╗
+        ██╗███████╗ ██╔════╝ ██║ ██║██╔═══██╗██╔════╝╚══██╔══╝ ██║████╗ ██║
+        ╚══██╔══╝██║ ██║██╔════╝ ██║ ███╗███████║██║ ██║███████╗ ██║ ██║██╔██╗
+        ██║ ██║ ███████║█████╗ ██║ ██║██╔══██║██║ ██║╚════██║ ██║ ██║██║╚██╗██║
+        ██║ ██╔══██║██╔══╝ ╚██████╔╝██║ ██║╚██████╔╝███████║ ██║ ██║██║ ╚████║
+        ██║ ██║ ██║███████╗ ╚═════╝ ╚═╝ ╚═╝ ╚═════╝ ╚══════╝ ╚═╝ ╚═╝╚═╝ ╚═══╝
+        ╚═╝ ╚═╝ ╚═╝╚══════╝ ███████╗██╗ ██╗███████╗██╗ ██╗ ██████╗ ██████╗
+        ██████╗ ███████╗ ██╔════╝██║ ██║██╔════╝██║ ██║
+        ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ███████╗███████║█████╗ ██║ ██║ ██║ ██║
+        ██║██║ ██║█████╗ ╚════██║██╔══██║██╔══╝ ██║ ██║ ██║ ██║ ██║██║ ██║██╔══╝
+        ███████║██║ ██║███████╗███████╗███████╗╚██████╗╚██████╔╝██████╔╝███████╗
+        ╚══════╝╚═╝ ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="{{ category }}-message">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </div>
+
+    {% block scripts %}
+    <script>
+      // Function to create typing effect
+      function typeWriter(element, text, speed = 30, index = 0) {
+        if (index < text.length) {
+          element.innerHTML += text.charAt(index);
+          index++;
+          setTimeout(() => typeWriter(element, text, speed, index), speed);
+        } else {
+          element.classList.remove("typing-animation");
+          // Signal that typing is complete
+          const event = new CustomEvent("typingComplete");
+          element.dispatchEvent(event);
+        }
+      }
+
+      // Toggle hint visibility
+      document.addEventListener("DOMContentLoaded", function () {
+        const hintBtn = document.querySelector(".hint-button");
+        const hintText = document.querySelector(".hint-text");
+
+        if (hintBtn && hintText) {
+          hintBtn.addEventListener("click", function () {
+            if (hintText.style.display === "block") {
+              hintText.style.display = "none";
+              hintBtn.textContent = "Show Hint";
+            } else {
+              hintText.style.display = "block";
+              hintBtn.textContent = "Hide Hint";
+            }
+          });
+        }
+      });
+    </script>
+    {% endblock %}
+  </body>
+</html>

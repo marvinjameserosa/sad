@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block content %}
+<div class="sparky-message typing-animation" id="victory-intro">
+  [SPARKY]:~# Transaction executed successfully.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message1"
+  style="display: none"
+>
+  [SPARKY]:~# Transaction hash: {{ transaction_hash }}
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message2"
+  style="display: none"
+>
+  [SPARKY]:~# The Source Ledger is shutting down. All currency systems will
+  destabilize.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message3"
+  style="display: none"
+>
+  [SPARKY]:~# You've successfully captured the final flag:
+</div>
+
+<div
+  id="flag-display"
+  style="
+    display: none;
+    margin: 20px 0;
+    color: #33ff33;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.5em;
+  "
+>
+  {{ flag }}
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message4"
+  style="display: none"
+>
+  [SPARKY]:~# Congratulations. The Sovereignty's control over the galactic
+  economy is broken.
+</div>
+
+<div
+  class="sparky-message typing-animation"
+  id="message5"
+  style="display: none"
+>
+  [SPARKY]:~# Mission complete. Disconnecting...
+</div>
+
+<div
+  style="text-align: center; margin-top: 40px; display: none"
+  id="restart-button"
+>
+  <a href="hub.cyberph.org" class="terminal-button">Return to Main Gateway</a>
+</div>
+
+{% endblock %} {% block scripts %} {{ super() }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const elements = [
+      document.getElementById("victory-intro"),
+      document.getElementById("message1"),
+      document.getElementById("message2"),
+      document.getElementById("message3"),
+      document.getElementById("flag-display"),
+      document.getElementById("message4"),
+      document.getElementById("message5"),
+      document.getElementById("restart-button"),
+    ];
+
+    function showNextElement(index) {
+      if (index < elements.length) {
+        if (index > 0) {
+          elements[index].style.display = "block";
+        }
+
+        if (elements[index].classList.contains("typing-animation")) {
+          const text = elements[index].textContent;
+          elements[index].textContent = "";
+
+          typeWriter(elements[index], text, 30);
+
+          elements[index].addEventListener("typingComplete", function () {
+            setTimeout(() => showNextElement(index + 1), 1500);
+          });
+        } else {
+          setTimeout(() => showNextElement(index + 1), 1500);
+        }
+      }
+    }
+
+    // Start the sequence
+    showNextElement(0);
+  });
+</script>
+{% endblock %}

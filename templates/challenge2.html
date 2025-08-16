@@ -1,0 +1,281 @@
+{% extends "base.html" %} {% block content %}
+<!-- Intro messages will appear here as before -->
+<div class="sparky-message typing-animation" id="challenge2-intro">
+  [SPARKY]:~# Well done. You're inside the perimeter.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="challenge1-flag"
+  style="display: none"
+>
+  [SPARKY]:~# You've successfully captured your first flag:
+</div>
+<div
+  id="flag-display"
+  style="
+    display: none;
+    margin: 10px 0 20px 0;
+    color: #33ff33;
+    font-weight: bold;
+    padding-left: 20px;
+  "
+>
+  {{ previous_flag }}
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message1"
+  style="display: none"
+>
+  [SPARKY]:~# But they didn't make it easy. There's another layer.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message2"
+  style="display: none"
+>
+  [SPARKY]:~# The Sovereignty's architects used asymmetric cryptography to
+  secure access.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message3"
+  style="display: none"
+>
+  [SPARKY]:~# This RSA implementation guards the core ledger systems.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message4"
+  style="display: none"
+>
+  [SPARKY]:~# Breaking it will give us access to the transaction network.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message5"
+  style="display: none"
+>
+  [SPARKY]:~# Control the ledger, control the galaxy.
+</div>
+<div
+  class="sparky-message typing-animation"
+  id="message6"
+  style="display: none"
+>
+  [SPARKY]:~# Switching to secure channel...
+</div>
+
+<!-- Secure Communique Section -->
+<div class="secure-channel" id="secure-channel" style="display: none">
+  <div class="secure-header">***** BEGIN SECURE COMMUNIQUE *****</div>
+  <div class="secure-message">
+    [SPARKY]:~# We've intercepted their RSA public key components:
+  </div>
+  <div class="secure-message">[SPARKY]:~# N = {{ rsa_n }} (modulus)</div>
+  <div class="secure-message">
+    [SPARKY]:~# e = {{ rsa_e }} (public exponent)
+  </div>
+  <div class="secure-message">
+    [SPARKY]:~# And this encrypted access code:
+    <span class="cipher-text">{{ encrypted_msg }}</span>
+  </div>
+  <div class="secure-message">[SPARKY]:~# Your mission:</div>
+  <div class="secure-message">
+    [SPARKY]:~# 1. Find the prime factors p and q where p×q=N.
+  </div>
+  <div class="secure-message">[SPARKY]:~# 2. Calculate the private key d.</div>
+  <div class="secure-message">
+    [SPARKY]:~# 3. Decrypt the message using m = c^d mod N.
+  </div>
+  <div class="secure-message">
+    [SPARKY]:~# 4. Submit your key and the decrypted message for verification.
+  </div>
+  <div class="secure-header">***** END SECURE COMMUNIQUE *****</div>
+</div>
+
+<!-- Feedback area for messages -->
+<div id="feedback-area" style="margin-top: 15px; display: none"></div>
+
+<!-- Phase 1: Prime Factorization -->
+<div id="prime-form" style="margin-top: 20px; display: none">
+  <h3>Phase 1: Find Prime Factors</h3>
+  <form
+    id="prime-factors-form"
+    action="{{ url_for('check_prime') }}"
+    method="POST"
+  >
+    <div class="form-row">
+      <label>Factor p:</label>
+      <input
+        type="text"
+        name="prime_p"
+        placeholder="Enter first prime factor"
+        class="terminal-input"
+      />
+    </div>
+    <div class="form-row">
+      <label>Factor q:</label>
+      <input
+        type="text"
+        name="prime_q"
+        placeholder="Enter second prime factor"
+        class="terminal-input"
+      />
+    </div>
+    <button type="submit" class="terminal-button">Submit Factors</button>
+  </form>
+</div>
+
+<!-- Phase 2: Decrypt & Verify -->
+<div id="solve-form" style="margin-top: 20px; display: none">
+  <h3>Phase 2: Decrypt Message & Verify</h3>
+  <p>
+    Once you have calculated 'd', use it to decrypt the message. Submit both to
+    complete the challenge.
+  </p>
+  <form
+    id="solve-challenge-form"
+    action="{{ url_for('solve_challenge2') }}"
+    method="POST"
+  >
+    <div class="form-row">
+      <label>Private Key (d):</label>
+      <input
+        type="text"
+        name="private_key"
+        placeholder="Enter calculated private key"
+        class="terminal-input"
+      />
+    </div>
+    <div class="form-row">
+      <label>Decrypted Message:</label>
+      <input
+        type="text"
+        name="decrypted_message"
+        placeholder="Enter the decrypted plaintext message"
+        class="terminal-input"
+      />
+    </div>
+    <button type="submit" class="terminal-button">Verify Solution</button>
+  </form>
+</div>
+
+<div
+  class="hint-section"
+  id="hint-section"
+  style="margin-top: 20px; display: none"
+>
+  <button class="hint-button">Show Hint</button>
+  <div class="hint-text">
+    <p>Both prime factors are less than 100.</p>
+    <p>Use the extended Euclidean algorithm to find d.</p>
+    <p>Each decrypted number maps to an ASCII character.</p>
+  </div>
+</div>
+{% endblock %} {% block scripts %} {{ super() }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // --- Typing animation and element reveal logic (as before) ---
+    const elements = [
+      document.getElementById("challenge2-intro"),
+      document.getElementById("challenge1-flag"),
+      document.getElementById("message1"),
+      document.getElementById("message2"),
+      document.getElementById("message3"),
+      document.getElementById("message4"),
+      document.getElementById("message5"),
+      document.getElementById("message6"),
+      document.getElementById("secure-channel"),
+      document.getElementById("prime-form"),
+      document.getElementById("hint-section"),
+    ];
+    const flagDisplay = document.getElementById("flag-display");
+
+    function showNextElement(index) {
+      if (index >= elements.length) return;
+      const el = elements[index];
+      if (index > 0 || el.id === "challenge2-intro") {
+        el.style.display = "block";
+      }
+      if (el.classList.contains("typing-animation")) {
+        const text = el.textContent.trim();
+        el.textContent = "";
+        typeWriter(el, text, 30);
+        el.addEventListener("typingComplete", () => {
+          if (el.id === "challenge1-flag") {
+            flagDisplay.style.display = "block";
+            setTimeout(() => showNextElement(index + 1), 1500);
+          } else {
+            setTimeout(() => showNextElement(index + 1), 1000);
+          }
+        });
+      } else {
+        setTimeout(() => showNextElement(index + 1), 800);
+      }
+    }
+    showNextElement(0);
+
+    // --- Utility function to show feedback ---
+    function showFeedback(message, isSuccess) {
+      const feedbackArea = document.getElementById("feedback-area");
+      const statusClass = isSuccess ? "feedback-success" : "feedback-error";
+      feedbackArea.innerHTML = `<div class="feedback-message ${statusClass}">${message}</div>`;
+      feedbackArea.style.display = "block";
+    }
+
+    // --- Generic Asynchronous Form Submission Handler ---
+    async function handleFormSubmit(formId, url, onSuccess) {
+      const form = document.getElementById(formId);
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+          if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+          const result = await response.json();
+          showFeedback(result.message, result.success);
+
+          if (result.success && onSuccess) {
+            onSuccess(result);
+          }
+        } catch (error) {
+          showFeedback(
+            "An unexpected error occurred. Please try again.",
+            false
+          );
+          console.error("Form submission error:", error);
+        }
+      });
+    }
+
+    // --- Setup form handlers ---
+    handleFormSubmit(
+      "prime-factors-form",
+      "{{ url_for('check_prime') }}",
+      (result) => {
+        // On successful prime submission, show the next part of the challenge
+        document.getElementById("solve-form").style.display = "block";
+      }
+    );
+
+    handleFormSubmit(
+      "solve-challenge-form",
+      "{{ url_for('solve_challenge2') }}",
+      (result) => {
+        if (result.redirect) {
+          setTimeout(() => {
+            window.location.href = result.redirect;
+          }, 2000);
+        }
+      }
+    );
+  });
+</script>
+{% endblock %}
