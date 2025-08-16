@@ -115,6 +115,23 @@
     // Filter out null elements that might cause errors
     const validMessages = messages.filter((msg) => msg !== null);
 
+    // Define the missing typeWriter function
+    function typeWriter(element, text, speed) {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          // When typing is complete, dispatch event
+          const event = new Event("typingComplete");
+          element.dispatchEvent(event);
+        }
+      }
+      type();
+    }
+
     function showNextMessage(index) {
       if (index < validMessages.length) {
         if (index > 0) {
@@ -129,36 +146,25 @@
           // Start typing effect
           typeWriter(validMessages[index], text, 30);
 
-          // Make sure the event is properly triggered after typing
-          setTimeout(() => {
-            const event = new Event("typingComplete");
-            validMessages[index].dispatchEvent(event);
-          }, text.length * 30 + 500); // Adjust timeout based on text length
+          // Add event listener for this specific message
+          validMessages[index].addEventListener(
+            "typingComplete",
+            function onTypingComplete() {
+              // Remove the event listener to prevent memory leaks
+              validMessages[index].removeEventListener(
+                "typingComplete",
+                onTypingComplete
+              );
+              // Show the next message after a delay
+              setTimeout(() => showNextMessage(index + 1), 1000);
+            }
+          );
         } else {
+          // For non-typing elements, just show them and continue
           validMessages[index].style.display = "block";
           setTimeout(() => showNextMessage(index + 1), 1000);
         }
       }
-    }
-
-    // Define typeWriter if it's not already defined elsewhere
-    if (typeof typeWriter !== "function") {
-      function typeWriter(element, text, speed) {
-        let i = 0;
-        function type() {
-          if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-          } else {
-            // Dispatch event when typing is complete
-            const event = new Event("typingComplete");
-            element.dispatchEvent(event);
-          }
-        }
-        type();
-      }
-      window.typeWriter = typeWriter;
     }
 
     // Start the sequence

@@ -87,6 +87,14 @@
   <div class="secure-message">
     [SPARKY]:~# The architects always leave a backdoor.
   </div>
+  <div class="secure-message">
+    [SPARKY]:~# Sometimes the key isn't hidden at all... it's right in front of
+    you, in plain sight.
+  </div>
+  <div class="secure-message">
+    [SPARKY]:~# Remember: the path you take to get here might be more important
+    than you think.
+  </div>
   {% if transaction_hash %}
   <div class="secure-message">
     [SPARKY]:~# Transaction hash: {{ transaction_hash }}
@@ -107,7 +115,7 @@
       <input
         type="text"
         name="kill_key"
-        placeholder="Enter the kill key"
+        placeholder="Enter the kill key: SEEN{...}"
         class="terminal-input"
         style="width: 400px; margin-right: 10px"
         {%
